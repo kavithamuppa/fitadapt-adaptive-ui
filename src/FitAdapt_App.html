@@ -1,0 +1,838 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FitAdapt – Intelligent Fitness Tracker</title>
+<style>
+/* ═══════════════════════════════════════
+   FITADAPT – ADAPTIVE FITNESS TRACKER
+   Adapts: color theme, font size, layout
+   density, sidebar width, visible sections,
+   typography weight — all based on behavior
+═══════════════════════════════════════ */
+
+/* ── BEGINNER THEME – soft, calm, spacious ── */
+:root {
+  --bg:          #f0f7ff;
+  --surface:     #ffffff;
+  --primary:     #4a90d9;
+  --primary-lt:  #e8f3fd;
+  --primary-dk:  #2c6fad;
+  --accent:      #5ba4e5;
+  --text:        #1e2d3d;
+  --text-muted:  #6b8299;
+  --border:      #d4e6f7;
+  --shadow:      0 2px 10px rgba(74,144,217,0.10);
+  --radius:      16px;
+  --radius-sm:   10px;
+  --font-size:   16px;
+  --wt-title:    600;
+  --wt-stat:     700;
+  --spacing:     1.4rem;
+  --card-pad:    1.4rem;
+  --stat-size:   2.2rem;
+  --btn-pad:     0.85rem 1.6rem;
+  --transition:  0.4s cubic-bezier(.4,0,.2,1);
+}
+
+/* ── INTERMEDIATE – balanced, green, energetic ── */
+body.intermediate {
+  --bg:         #f5fff8;
+  --surface:    #ffffff;
+  --primary:    #1D9E75;
+  --primary-lt: #e1f5ee;
+  --primary-dk: #0f6e56;
+  --accent:     #27c98a;
+  --text:       #0d2b1f;
+  --text-muted: #4a7a63;
+  --border:     #b5e8d4;
+  --shadow:     0 2px 12px rgba(29,158,117,0.12);
+  --font-size:  15px;
+  --wt-title:   700;
+  --wt-stat:    800;
+  --spacing:    1.1rem;
+  --card-pad:   1.1rem;
+  --stat-size:  2.6rem;
+  --btn-pad:    0.75rem 1.4rem;
+}
+
+/* ── ADVANCED – dark, intense, dense, bold ── */
+body.advanced {
+  --bg:         #0d0f14;
+  --surface:    #161922;
+  --primary:    #f97316;
+  --primary-lt: #2a1a0a;
+  --primary-dk: #c55a0a;
+  --accent:     #facc15;
+  --text:       #f1f5f9;
+  --text-muted: #94a3b8;
+  --border:     #2a2f3d;
+  --shadow:     0 2px 20px rgba(249,115,22,0.15);
+  --font-size:  13px;
+  --wt-title:   800;
+  --wt-stat:    900;
+  --spacing:    0.7rem;
+  --card-pad:   0.8rem;
+  --stat-size:  3rem;
+  --btn-pad:    0.55rem 1.1rem;
+}
+
+/* ── RECOVERY – warm amber, spacious, gentle ── */
+body.recovery {
+  --bg:         #fdf8f0;
+  --surface:    #fffcf7;
+  --primary:    #b45309;
+  --primary-lt: #fef3c7;
+  --primary-dk: #92400e;
+  --accent:     #f59e0b;
+  --text:       #292524;
+  --text-muted: #78716c;
+  --border:     #fde68a;
+  --shadow:     0 2px 12px rgba(180,83,9,0.08);
+  --font-size:  17px;
+  --wt-title:   500;
+  --wt-stat:    600;
+  --spacing:    1.6rem;
+  --card-pad:   1.6rem;
+  --stat-size:  2rem;
+  --btn-pad:    1rem 1.8rem;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { font-size: var(--font-size); transition: font-size var(--transition); }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  transition: background var(--transition), color var(--transition);
+}
+
+/* ── HEADER ── */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 0.75rem 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  position: sticky; top: 0; z-index: 100;
+  box-shadow: var(--shadow);
+  transition: background var(--transition), border-color var(--transition), box-shadow var(--transition);
+}
+.logo { font-size: 1.2rem; font-weight: var(--wt-title); color: var(--primary); letter-spacing: -0.5px; transition: color var(--transition), font-weight var(--transition); }
+.level-badge {
+  padding: 3px 12px; border-radius: 99px;
+  background: var(--primary-lt); color: var(--primary);
+  font-size: 0.72rem; font-weight: 700;
+  border: 1px solid var(--primary);
+  text-transform: uppercase; letter-spacing: 0.5px;
+  transition: all var(--transition);
+}
+.header-right { margin-left: auto; display: flex; align-items: center; gap: 0.75rem; font-size: 0.82rem; color: var(--text-muted); }
+
+/* ── LAYOUT ── */
+.app-layout { display: flex; flex: 1; }
+
+/* ── SIDEBAR ── */
+aside {
+  width: 200px; flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  padding: 1rem 0.7rem;
+  display: flex; flex-direction: column; gap: 0.2rem;
+  transition: width var(--transition), background var(--transition), border-color var(--transition);
+}
+/* Advanced: collapse sidebar to icon-only */
+body.advanced aside { width: 56px; }
+body.recovery aside { width: 220px; }
+
+.nav-section { font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); padding: 0.6rem 0.6rem 0.2rem; transition: opacity var(--transition); }
+body.advanced .nav-section { display: none; }
+
+.nav-btn {
+  display: flex; align-items: center; gap: 0.55rem;
+  padding: 0.5rem 0.7rem; border-radius: var(--radius-sm);
+  background: transparent; border: none; cursor: pointer;
+  color: var(--text-muted); font-size: 0.875rem; font-weight: 500;
+  width: 100%; text-align: left;
+  transition: all var(--transition);
+}
+.nav-btn:hover, .nav-btn.active { background: var(--primary-lt); color: var(--primary); font-weight: 700; }
+.nav-icon { font-size: 1rem; flex-shrink: 0; }
+.nav-text { transition: opacity var(--transition); }
+body.advanced .nav-text { display: none; }
+body.advanced .nav-btn { justify-content: center; padding: 0.65rem; }
+
+/* ── MAIN ── */
+main { flex: 1; padding: var(--spacing) 1.5rem; overflow-y: auto; transition: padding var(--transition); }
+
+/* ── PAGES ── */
+.page { display: none; }
+.page.active { display: block; }
+
+/* ── TYPOGRAPHY ── */
+h2 { font-size: 1.35rem; font-weight: var(--wt-title); margin-bottom: 0.3rem; color: var(--text); transition: font-size var(--transition), font-weight var(--transition); }
+body.advanced h2 { font-size: 1.05rem; }
+body.recovery h2 { font-size: 1.55rem; }
+.page-sub { color: var(--text-muted); font-size: 0.875rem; margin-bottom: var(--spacing); transition: color var(--transition); }
+
+/* ── CARDS ── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--card-pad);
+  box-shadow: var(--shadow);
+  margin-bottom: var(--spacing);
+  transition: all var(--transition);
+}
+.card-title { font-weight: var(--wt-title); font-size: 0.95rem; margin-bottom: 0.4rem; color: var(--text); transition: font-weight var(--transition); }
+.card-sub { font-size: 0.8rem; color: var(--text-muted); }
+
+/* ── GRIDS ── */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: var(--spacing); }
+.grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: var(--spacing); }
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 0.75rem;
+  margin-bottom: var(--spacing);
+  transition: all var(--transition);
+}
+body.beginner .stat-grid  { grid-template-columns: repeat(2,1fr); }
+body.recovery .stat-grid  { grid-template-columns: repeat(2,1fr); }
+body.advanced .stat-grid  { grid-template-columns: repeat(4,1fr); }
+
+/* ── STAT CARDS ── */
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: var(--card-pad);
+  text-align: center; transition: all var(--transition);
+}
+.stat-val {
+  font-size: var(--stat-size); font-weight: var(--wt-stat);
+  color: var(--primary); line-height: 1;
+  transition: font-size var(--transition), font-weight var(--transition), color var(--transition);
+}
+.stat-label { font-size: 0.72rem; color: var(--text-muted); margin-top: 0.35rem; text-transform: uppercase; letter-spacing: 0.5px; }
+
+/* ── BUTTONS ── */
+.btn {
+  padding: var(--btn-pad); border-radius: 99px;
+  background: var(--primary); color: #fff;
+  border: none; cursor: pointer; font-weight: 700; font-size: 0.875rem;
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  transition: all var(--transition);
+}
+.btn:hover { background: var(--primary-dk); transform: translateY(-1px); }
+.btn:active { transform: scale(0.97); }
+.btn.outline { background: transparent; border: 1.5px solid var(--border); color: var(--text-muted); }
+.btn.outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-lt); }
+.btn.sm { padding: 0.4rem 1rem; font-size: 0.78rem; }
+.btn.danger { background: #dc2626; }
+.btn.danger:hover { background: #b91c1c; }
+
+/* ── WORKOUT ITEMS ── */
+.workout-item {
+  display: flex; align-items: center; gap: 0.9rem;
+  padding: 0.8rem 0; border-bottom: 1px solid var(--border);
+  transition: all var(--transition);
+}
+.workout-item:last-child { border-bottom: none; }
+.w-check {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 2px solid var(--border);
+  background: transparent; cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.72rem; color: transparent;
+  transition: all 0.2s;
+}
+.w-check.done { background: var(--primary); border-color: var(--primary); color: #fff; }
+.w-name { flex: 1; font-size: 0.9rem; font-weight: 500; transition: all 0.2s; }
+.w-name.done { text-decoration: line-through; color: var(--text-muted); }
+.w-meta { font-size: 0.77rem; color: var(--text-muted); margin-top: 2px; }
+.diff-tag { font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 99px; text-transform: uppercase; }
+.diff-easy   { background: #dcfce7; color: #14532d; }
+.diff-medium { background: #fef9c3; color: #713f12; }
+.diff-hard   { background: #fee2e2; color: #7f1d1d; }
+
+/* ── PROGRESS BAR ── */
+.prog-wrap { background: var(--border); border-radius: 99px; height: 8px; overflow: hidden; margin-top: 0.5rem; }
+.prog-fill { height: 100%; background: var(--primary); border-radius: 99px; transition: width 0.8s ease, background var(--transition); }
+
+/* ── STREAK DOTS ── */
+.streak-row { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 0.6rem; }
+.s-dot {
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.65rem; font-weight: 700;
+  border: 1.5px solid var(--border);
+  color: var(--text-muted); transition: all var(--transition);
+}
+.s-dot.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+.s-dot.missed { background: #fee2e2; border-color: #fca5a5; color: #991b1b; }
+.s-dot.rest   { background: var(--primary-lt); border-color: var(--primary); color: var(--primary); }
+
+/* ── ADAPT LOG ── */
+.log-entry {
+  display: flex; gap: 0.75rem; align-items: flex-start;
+  padding: 0.65rem 0; border-bottom: 1px solid var(--border);
+  font-size: 0.875rem;
+  animation: fadeUp 0.3s ease;
+}
+@keyframes fadeUp { from { opacity:0; transform:translateY(4px); } to { opacity:1; transform:none; } }
+.log-entry:last-child { border-bottom: none; }
+.log-time { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+.log-tag { display: inline-block; padding: 1px 7px; border-radius: 5px; font-size: 0.68rem; font-weight: 700; text-transform: uppercase; }
+.tag-auto { background: var(--primary-lt); color: var(--primary); }
+.tag-user { background: #fef3c7; color: #92400e; }
+
+/* ── TOGGLE ── */
+.toggle { position: relative; width: 42px; height: 23px; display: inline-block; flex-shrink: 0; }
+.toggle input { opacity:0; width:0; height:0; }
+.t-rail { position: absolute; inset:0; cursor:pointer; background:var(--border); border-radius:99px; transition:background var(--transition); }
+.t-rail::before { content:''; position:absolute; width:17px; height:17px; border-radius:50%; background:#fff; left:3px; top:3px; transition:transform var(--transition); }
+input:checked + .t-rail { background: var(--primary); }
+input:checked + .t-rail::before { transform: translateX(19px); }
+
+/* ── SETTINGS ── */
+.setting-row { display:flex; align-items:center; justify-content:space-between; padding:0.75rem 0; border-bottom:1px solid var(--border); }
+.setting-row:last-child { border-bottom: none; }
+.setting-label { font-size:0.9rem; font-weight:500; }
+.setting-desc  { font-size:0.76rem; color:var(--text-muted); margin-top:2px; }
+select.ctrl { padding:0.35rem 0.7rem; border-radius:var(--radius-sm); border:1.5px solid var(--border); background:var(--surface); color:var(--text); font-size:0.85rem; cursor:pointer; outline:none; }
+select.ctrl:focus { border-color: var(--primary); }
+
+/* ── VISIBILITY RULES (section show/hide) ── */
+.adv-only    { display: none; }
+body.advanced .adv-only { display: block; }
+body.advanced .no-adv   { display: none; }
+.rec-only    { display: none; }
+body.recovery .rec-only  { display: block; }
+body.recovery .no-rec    { display: none; }
+
+/* ── TOAST ── */
+#toast {
+  position: fixed; bottom: 1.5rem; right: 1.5rem;
+  background: var(--surface); border: 1px solid var(--primary);
+  border-radius: var(--radius); padding: 0.85rem 1.2rem;
+  box-shadow: var(--shadow); font-size: 0.85rem;
+  max-width: 290px; z-index: 999;
+  opacity: 0; transform: translateY(14px);
+  transition: all 0.35s ease; pointer-events: none;
+}
+#toast.show { opacity:1; transform:translateY(0); }
+#toast strong { color: var(--primary); }
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 99px; }
+
+@media(max-width:700px) {
+  aside { display: none; }
+  .grid-2, .grid-3, .stat-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body class="beginner">
+
+<!-- TOAST -->
+<div id="toast"><strong>FitAdapt AI:</strong> <span id="toast-msg"></span></div>
+
+<!-- HEADER -->
+<header>
+  <div class="logo">🏋 FitAdapt</div>
+  <div class="level-badge" id="level-badge">Beginner</div>
+  <div style="font-size:0.82rem;color:var(--text-muted);">🔥 Streak: <strong id="streak-hdr">0</strong> days</div>
+  <div class="header-right">
+    <span id="adapt-hdr">0 adaptations</span>
+    <button class="btn sm outline" onclick="resetAll()">↺ Reset</button>
+  </div>
+</header>
+
+<div class="app-layout">
+
+<!-- SIDEBAR -->
+<aside>
+  <div class="nav-section">Menu</div>
+  <button class="nav-btn active" onclick="nav('dashboard',this)"><span class="nav-icon">⬡</span><span class="nav-text">Dashboard</span></button>
+  <button class="nav-btn" onclick="nav('workouts',this)"><span class="nav-icon">💪</span><span class="nav-text">Workouts</span></button>
+  <button class="nav-btn" onclick="nav('progress',this)"><span class="nav-icon">📈</span><span class="nav-text">Progress</span></button>
+  <button class="nav-btn" onclick="nav('log',this)"><span class="nav-icon">📋</span><span class="nav-text">Adapt Log</span></button>
+  <button class="nav-btn" onclick="nav('settings',this)"><span class="nav-icon">⚙</span><span class="nav-text">Settings</span></button>
+  <div style="margin-top:auto;padding:0.4rem 0.2rem;">
+    <div class="nav-section" style="padding-bottom:0.3rem;">Level</div>
+    <div class="prog-wrap"><div class="prog-fill" id="side-bar" style="width:5%;"></div></div>
+    <div style="font-size:0.68rem;color:var(--text-muted);margin-top:0.3rem;" id="side-score" class="nav-text">Score: 0</div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main>
+
+  <!-- DASHBOARD -->
+  <div id="page-dashboard" class="page active">
+    <h2 id="dash-title">Welcome to FitAdapt 👋</h2>
+    <p class="page-sub" id="dash-sub">Complete workouts and the interface adapts to your fitness level automatically.</p>
+
+    <div class="stat-grid">
+      <div class="stat-card"><div class="stat-val" id="s-done">0</div><div class="stat-label">Completed</div></div>
+      <div class="stat-card"><div class="stat-val" id="s-streak">0</div><div class="stat-label">Day Streak</div></div>
+      <div class="stat-card"><div class="stat-val" id="s-cal">0</div><div class="stat-label">Calories</div></div>
+      <div class="stat-card"><div class="stat-val" id="s-score">0</div><div class="stat-label">Level Score</div></div>
+    </div>
+
+    <!-- Today's Plan (hidden in recovery) -->
+    <div class="card no-rec">
+      <div class="card-title">📅 Today's Adaptive Plan</div>
+      <div class="card-sub" id="plan-desc" style="margin-bottom:0.8rem;">Your beginner plan — simple and achievable.</div>
+      <div id="today-list"></div>
+      <div style="margin-top:1rem;display:flex;gap:0.7rem;flex-wrap:wrap;">
+        <button class="btn" onclick="completeAll()">✓ Complete All</button>
+        <button class="btn outline" onclick="skipDay()">Skip Today</button>
+      </div>
+    </div>
+
+    <!-- Recovery Plan (only in recovery mode) -->
+    <div class="card rec-only">
+      <div class="card-title">🌿 Recovery Day Plan</div>
+      <div class="card-sub" style="margin-bottom:1rem;">Your body needs rest. Gentle movement only today.</div>
+      <div class="workout-item"><div class="w-check">→</div><div><div class="w-name">10 min gentle stretching</div><div class="w-meta">Full body · Low intensity</div></div><div class="diff-tag diff-easy">Easy</div></div>
+      <div class="workout-item"><div class="w-check">→</div><div><div class="w-name">5 min deep breathing</div><div class="w-meta">Mindfulness · Relaxation</div></div><div class="diff-tag diff-easy">Easy</div></div>
+      <div class="workout-item"><div class="w-check">→</div><div><div class="w-name">15 min light walk (optional)</div><div class="w-meta">Outdoors · Very light</div></div><div class="diff-tag diff-easy">Easy</div></div>
+    </div>
+
+    <!-- AI Insight -->
+    <div class="card">
+      <div class="card-title">🤖 AI Insight</div>
+      <p id="ai-insight" style="font-size:0.9rem;line-height:1.65;color:var(--text-muted);margin-top:0.4rem;">
+        Start completing workouts — FitAdapt will analyse your patterns and personalise your experience.
+      </p>
+    </div>
+
+    <!-- Advanced Metrics Panel (advanced only) -->
+    <div class="card adv-only">
+      <div class="card-title">⚡ Performance Metrics</div>
+      <div class="grid-3" style="margin-top:0.7rem;gap:1rem;">
+        <div><div style="font-size:1.5rem;font-weight:900;color:var(--primary);" id="a-vol">0</div><div style="font-size:0.7rem;color:var(--text-muted);">Weekly Volume</div></div>
+        <div><div style="font-size:1.5rem;font-weight:900;color:var(--accent);" id="a-pr">0</div><div style="font-size:0.7rem;color:var(--text-muted);">Personal Records</div></div>
+        <div><div style="font-size:1.5rem;font-weight:900;color:var(--primary);" id="a-eff">—</div><div style="font-size:0.7rem;color:var(--text-muted);">Kcal/Workout</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WORKOUTS -->
+  <div id="page-workouts" class="page">
+    <h2>💪 Workout Library</h2>
+    <p class="page-sub" id="lib-sub">Beginner exercises shown. Complete workouts to unlock more.</p>
+    <div id="lib-list"></div>
+  </div>
+
+  <!-- PROGRESS -->
+  <div id="page-progress" class="page">
+    <h2>📈 Your Progress</h2>
+    <p class="page-sub">Track your streak, milestones, and level journey.</p>
+    <div class="card">
+      <div class="card-title">📅 This Week</div>
+      <div class="streak-row" id="streak-dots"></div>
+    </div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">🏆 Milestones</div>
+        <div id="milestones" style="margin-top:0.5rem;font-size:0.875rem;"></div>
+      </div>
+      <div class="card">
+        <div class="card-title">📊 Level Progress</div>
+        <div style="margin-top:0.6rem;">
+          <div style="display:flex;justify-content:space-between;font-size:0.78rem;color:var(--text-muted);margin-bottom:0.4rem;">
+            <span id="cur-lv">Beginner</span><span id="nxt-lv">Intermediate</span>
+          </div>
+          <div class="prog-wrap"><div class="prog-fill" id="big-bar" style="width:0%;"></div></div>
+          <div style="font-size:0.76rem;color:var(--text-muted);margin-top:0.4rem;" id="pct-label">0% to next level</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADAPT LOG -->
+  <div id="page-log" class="page">
+    <h2>📋 Adaptation Log</h2>
+    <p class="page-sub">Every visual and layout change made — and the reason why.</p>
+    <div class="card" id="log-list">
+      <div style="text-align:center;padding:2rem;color:var(--text-muted);font-size:0.9rem;">No adaptations yet — start working out!</div>
+    </div>
+  </div>
+
+  <!-- SETTINGS -->
+  <div id="page-settings" class="page">
+    <h2>⚙ Settings</h2>
+    <p class="page-sub">Manual overrides and simulation tools for testing adaptation.</p>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:0.8rem;">Fitness Controls</div>
+      <div class="setting-row">
+        <div><div class="setting-label">Override Level</div><div class="setting-desc">Force UI into a specific mode</div></div>
+        <select class="ctrl" id="override-sel" onchange="manualLevel(this.value)">
+          <option value="auto">Auto (AI decides)</option>
+          <option value="beginner">Beginner</option>
+          <option value="intermediate">Intermediate</option>
+          <option value="advanced">Advanced</option>
+          <option value="recovery">Recovery</option>
+        </select>
+      </div>
+      <div class="setting-row">
+        <div><div class="setting-label">Auto Adapt</div><div class="setting-desc">Let FitAdapt change the UI automatically</div></div>
+        <label class="toggle"><input type="checkbox" id="auto-tog" checked onchange="toggleAuto(this.checked)"/><span class="t-rail"></span></label>
+      </div>
+      <div class="setting-row">
+        <div><div class="setting-label">Injury / Rest Mode</div><div class="setting-desc">Immediately switches to recovery layout</div></div>
+        <label class="toggle"><input type="checkbox" id="injury-tog" onchange="toggleInjury(this.checked)"/><span class="t-rail"></span></label>
+      </div>
+    </div>
+    <div class="card">
+      <div class="card-title" style="margin-bottom:0.8rem;">Simulate Behavior</div>
+      <div style="display:flex;flex-wrap:wrap;gap:0.6rem;">
+        <button class="btn sm" onclick="sim('streak',3)">3-day streak</button>
+        <button class="btn sm" onclick="sim('streak',7)">7-day streak</button>
+        <button class="btn sm outline" onclick="sim('skip',3)">3 skips</button>
+        <button class="btn sm outline" onclick="sim('complete',5)">5 completions</button>
+        <button class="btn sm danger" onclick="resetAll()">↺ Full Reset</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════════════
+   FITADAPT ADAPTIVE ENGINE
+   State → score → level → full UI mutation
+   Adapts on every meaningful user interaction
+═══════════════════════════════════════════════════ */
+
+const ST = {
+  level: 'beginner',
+  score: 0,
+  done: 0, skipped: 0, streak: 0, calories: 0,
+  adaptCount: 0,
+  autoAdapt: true,
+  injuryMode: false,
+  manualOverride: false,
+  logs: [],
+  week: Array(7).fill('empty'),
+  milestones: [],
+  todayDone: [],
+  prs: 0,
+};
+
+/* Workout data per level */
+const WK = {
+  beginner: [
+    { n:'Bodyweight Squats', m:'3×10', c:80,  d:'easy'   },
+    { n:'Wall Push-ups',     m:'3×8',  c:60,  d:'easy'   },
+    { n:'Standing March',    m:'5 min',c:40,  d:'easy'   },
+  ],
+  intermediate: [
+    { n:'Dumbbell Squats',   m:'4×12', c:140, d:'medium' },
+    { n:'Push-ups',          m:'4×15', c:120, d:'medium' },
+    { n:'Plank Hold',        m:'3×45s',c:90,  d:'medium' },
+    { n:'Jumping Jacks',     m:'3×30', c:100, d:'medium' },
+  ],
+  advanced: [
+    { n:'Barbell Squats',    m:'5×5 @80%', c:220, d:'hard' },
+    { n:'Weighted Pull-ups', m:'5×6',      c:180, d:'hard' },
+    { n:'Box Jumps',         m:'4×10',     c:200, d:'hard' },
+    { n:'Kettlebell Swings', m:'5×20',     c:250, d:'hard' },
+    { n:'Battle Ropes',      m:'5×30s',    c:160, d:'hard' },
+  ],
+};
+
+const LIB = {
+  beginner:     WK.beginner,
+  intermediate: [...WK.beginner, ...WK.intermediate],
+  advanced:     [...WK.beginner, ...WK.intermediate, ...WK.advanced],
+  recovery:     [{ n:'Gentle Stretching', m:'10 min', c:30, d:'easy' }],
+};
+
+/* ── NAVIGATION ── */
+function nav(id, btn) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
+/* ── RENDER TODAY WORKOUTS ── */
+function renderToday() {
+  const src = ST.level === 'recovery' ? WK.beginner : (WK[ST.level] || WK.beginner);
+  ST.todayDone = src.map(() => false);
+  document.getElementById('today-list').innerHTML = src.map((w,i) => `
+    <div class="workout-item">
+      <div class="w-check" id="wc${i}" onclick="checkW(${i},${w.c},'${w.n}')"></div>
+      <div style="flex:1;">
+        <div class="w-name" id="wn${i}">${w.n}</div>
+        <div class="w-meta">${w.m} · ~${w.c} kcal</div>
+      </div>
+      <div class="diff-tag diff-${w.d}">${w.d}</div>
+    </div>`).join('');
+  const d = { beginner:'Your beginner plan — simple and achievable.', intermediate:'Intermediate plan — building real strength.', advanced:'Elite plan — maximum intensity.', recovery:'Recovery mode — gentle movement only.' };
+  document.getElementById('plan-desc').textContent = d[ST.level] || d.beginner;
+}
+
+/* ── CHECK WORKOUT ── */
+function checkW(i, cal, name) {
+  ST.todayDone[i] = !ST.todayDone[i];
+  const c = document.getElementById('wc'+i), n = document.getElementById('wn'+i);
+  if (ST.todayDone[i]) {
+    c.classList.add('done'); c.textContent = '✓'; n.classList.add('done');
+    ST.done++; ST.calories += cal;
+    checkMilestone(name);
+  } else {
+    c.classList.remove('done'); c.textContent = ''; n.classList.remove('done');
+    ST.done = Math.max(0, ST.done-1); ST.calories = Math.max(0, ST.calories-cal);
+  }
+  refresh(); recalc();
+}
+
+function completeAll() {
+  const src = ST.level === 'recovery' ? WK.beginner : (WK[ST.level] || WK.beginner);
+  src.forEach((w,i) => {
+    if (!ST.todayDone[i]) {
+      ST.todayDone[i]=true;
+      const c=document.getElementById('wc'+i), n=document.getElementById('wn'+i);
+      if(c){c.classList.add('done');c.textContent='✓';}
+      if(n) n.classList.add('done');
+      ST.done++; ST.calories+=w.c;
+    }
+  });
+  ST.streak++;
+  if(ST.streak<=7) ST.week[ST.streak-1]='active';
+  refresh(); recalc(); renderDots();
+  addLog('💪','All workouts completed — streak updated!','auto');
+}
+
+function skipDay() {
+  ST.skipped++;
+  const idx = Math.min(ST.streak, 6);
+  ST.week[idx] = 'missed';
+  recalc(); renderDots();
+  addLog('⏭','Skipped today. Monitoring skip pattern…','user');
+}
+
+/* ── LEVEL RECALCULATION ENGINE ── */
+function recalc() {
+  if (!ST.autoAdapt || ST.manualOverride) return;
+  ST.score = Math.max(0, Math.min(100, Math.round(
+    ST.done * 8 + ST.streak * 12 + (ST.calories/50) - ST.skipped * 10
+  )));
+  let lv = 'beginner';
+  if      (ST.injuryMode)      lv = 'recovery';
+  else if (ST.skipped >= 3)    lv = 'recovery';
+  else if (ST.score >= 75)     lv = 'advanced';
+  else if (ST.score >= 35)     lv = 'intermediate';
+  if (lv !== ST.level) setLevel(lv, true);
+  else updateLevelUI();
+}
+
+/* ══ CORE ADAPTATION: setLevel mutates the entire UI ══ */
+function setLevel(lv, auto=false) {
+  const prev = ST.level;
+  ST.level = lv;
+
+  /* 1. Body class → triggers CSS variable cascade:
+        font-size, font-weight, color theme, spacing,
+        card padding, stat size, button padding */
+  document.body.className = lv;
+
+  /* 2. Badge label */
+  document.getElementById('level-badge').textContent = lv.charAt(0).toUpperCase()+lv.slice(1);
+
+  /* 3. Re-render content sections for new level */
+  renderToday();
+  renderLib();
+
+  /* 4. Stats + level UI */
+  refresh();
+  updateLevelUI();
+  updateInsight();
+  renderMilestones();
+
+  /* 5. Counters */
+  ST.adaptCount++;
+  document.getElementById('adapt-hdr').textContent = ST.adaptCount + ' adaptations';
+
+  /* 6. Describe what changed visually */
+  const desc = {
+    beginner:     'Soft blue theme · Large spacious layout · Simple 2-column stats · Sidebar expanded.',
+    intermediate: 'Green energetic theme · Denser layout · 4-column stats · Bold typography.',
+    advanced:     'Dark intense theme · Sidebar icon-only · Maximum density · Performance panel unlocked · Heavy typography.',
+    recovery:     'Warm amber theme · Extra spacious · Larger font · Recovery workout plan shown · Gentle typography.',
+  };
+  addLog('🤖', `Level: ${prev} → ${lv}. ${desc[lv]}`, auto ? 'auto' : 'user');
+  toast(`Adapted to ${lv} mode! ${desc[lv]}`);
+}
+
+/* ── REFRESH STATS ── */
+function refresh() {
+  document.getElementById('s-done').textContent   = ST.done;
+  document.getElementById('s-streak').textContent = ST.streak;
+  document.getElementById('s-cal').textContent    = ST.calories;
+  document.getElementById('s-score').textContent  = ST.score;
+  document.getElementById('streak-hdr').textContent = ST.streak;
+  document.getElementById('a-vol').textContent    = ST.done * 3 + ' sets';
+  document.getElementById('a-pr').textContent     = ST.prs;
+  document.getElementById('a-eff').textContent    = ST.done > 0 ? Math.round(ST.calories/ST.done) : '—';
+}
+
+/* ── UPDATE LEVEL UI ── */
+function updateLevelUI() {
+  document.getElementById('side-bar').style.width = ST.score + '%';
+  document.getElementById('big-bar').style.width  = ST.score + '%';
+  document.getElementById('side-score').textContent = 'Score: ' + ST.score;
+  document.getElementById('pct-label').textContent  = ST.score + '% to next level';
+  const next = { beginner:'Intermediate', intermediate:'Advanced', advanced:'Elite', recovery:'Beginner' };
+  const cur  = { beginner:'Beginner', intermediate:'Intermediate', advanced:'Advanced', recovery:'Recovery' };
+  document.getElementById('cur-lv').textContent = cur[ST.level];
+  document.getElementById('nxt-lv').textContent = next[ST.level];
+  const titles = { beginner:'Welcome to FitAdapt 👋', intermediate:'Great progress! Keep pushing 💪', advanced:'Elite mode activated ⚡', recovery:'Rest and recover today 🌿' };
+  const subs   = { beginner:'Complete workouts — the interface adapts to your fitness level automatically.', intermediate:'Your consistency is showing. Advanced mode unlocks at score 75.', advanced:'Peak performance. Every session tracked. Every metric optimised.', recovery:'FitAdapt switched to recovery mode. Your body needs rest today.' };
+  document.getElementById('dash-title').textContent = titles[ST.level];
+  document.getElementById('dash-sub').textContent   = subs[ST.level];
+}
+
+/* ── AI INSIGHT ── */
+function updateInsight() {
+  const ins = {
+    beginner:     'You are building your foundation. FitAdapt promotes you to intermediate at score 35. Focus on consistency — 3 sessions per week is ideal at this stage.',
+    intermediate: 'Strong momentum! Your calorie burn and streak are growing together. Score 75 unlocks the full advanced interface with performance metrics.',
+    advanced:     'Elite mode. Your weekly volume, personal records, and calorie efficiency are all tracked. The dark intense interface reflects your commitment level.',
+    recovery:     'A skip pattern or injury flag triggered recovery mode — a protective adaptation. Gentle movement today builds the foundation for a stronger return tomorrow.',
+  };
+  document.getElementById('ai-insight').textContent = ins[ST.level];
+}
+
+/* ── RENDER LIBRARY ── */
+function renderLib() {
+  const all = LIB[ST.level] || LIB.beginner;
+  const s = { beginner:'Showing beginner exercises. Complete more to unlock advanced.', intermediate:'Intermediate unlocked! Beginner exercises also available.', advanced:'Full library unlocked — all difficulty levels.', recovery:'Recovery mode — gentle exercises only.' };
+  document.getElementById('lib-sub').textContent = s[ST.level];
+  document.getElementById('lib-list').innerHTML = all.map(w => `
+    <div class="card" style="margin-bottom:0.7rem;">
+      <div style="display:flex;align-items:center;justify-content:space-between;">
+        <div>
+          <div class="card-title">${w.n}</div>
+          <div class="card-sub">${w.m} · ~${w.c} kcal
+            <span class="diff-tag diff-${w.d}" style="margin-left:0.3rem;">${w.d}</span>
+          </div>
+        </div>
+        <button class="btn sm outline" onclick="addLog('📌','Logged: ${w.n}','user')">+ Log</button>
+      </div>
+    </div>`).join('');
+}
+
+/* ── STREAK DOTS ── */
+function renderDots() {
+  const lbl = ['M','T','W','T','F','S','S'];
+  document.getElementById('streak-dots').innerHTML = lbl.map((l,i) => {
+    const s = ST.week[i] || 'empty';
+    return `<div class="s-dot ${s === 'active' ? 'active' : s === 'missed' ? 'missed' : s === 'rest' ? 'rest' : ''}" title="${l}">${l}</div>`;
+  }).join('');
+}
+
+/* ── MILESTONES ── */
+function checkMilestone(name) {
+  const checks = [
+    { c:()=> ST.done===1,        m:'🏅 First workout done!' },
+    { c:()=> ST.done===5,        m:'🥈 5 workouts completed!' },
+    { c:()=> ST.done===10,       m:'🥇 10 workouts — amazing!' },
+    { c:()=> ST.calories>=500,   m:'🔥 500 calories burned!' },
+    { c:()=> ST.streak>=3,       m:'⚡ 3-day streak!' },
+    { c:()=> ST.streak>=7,       m:'🏆 7-day streak — elite!' },
+  ];
+  checks.forEach(ck => {
+    if (ck.c() && !ST.milestones.includes(ck.m)) {
+      ST.milestones.push(ck.m); ST.prs++;
+      renderMilestones();
+      addLog('🏆','Milestone: '+ck.m,'auto');
+    }
+  });
+}
+
+function renderMilestones() {
+  const el = document.getElementById('milestones');
+  if (!el) return;
+  el.innerHTML = ST.milestones.length === 0
+    ? '<div style="color:var(--text-muted);font-size:0.85rem;">No milestones yet — keep going!</div>'
+    : ST.milestones.map(m => `<div style="padding:0.3rem 0;">${m}</div>`).join('');
+}
+
+/* ── ADAPT LOG ── */
+function addLog(icon, msg, type) {
+  ST.logs.unshift({ icon, msg, type, t: new Date().toLocaleTimeString() });
+  document.getElementById('log-list').innerHTML = ST.logs.map(e => `
+    <div class="log-entry">
+      <div style="font-size:1rem;flex-shrink:0;margin-top:1px;">${e.icon}</div>
+      <div style="flex:1;">
+        <div>${e.msg}</div>
+        <div class="log-time">${e.t} · <span class="log-tag tag-${e.type}">${e.type.toUpperCase()}</span></div>
+      </div>
+    </div>`).join('');
+}
+
+/* ── TOAST ── */
+let tTimer;
+function toast(msg) {
+  document.getElementById('toast-msg').textContent = msg;
+  const t = document.getElementById('toast');
+  t.classList.add('show');
+  clearTimeout(tTimer);
+  tTimer = setTimeout(() => t.classList.remove('show'), 4000);
+}
+
+/* ── SETTINGS ── */
+function toggleAuto(v)   { ST.autoAdapt=v; addLog(v?'✅':'⏸', v?'Auto-Adapt enabled':'Auto-Adapt paused','user'); }
+function toggleInjury(v) {
+  ST.injuryMode = v;
+  if(v){ setLevel('recovery',false); addLog('🩹','Injury mode on — recovery layout applied','user'); }
+  else { ST.manualOverride=false; recalc(); addLog('💪','Injury mode off — resuming adaptation','user'); }
+}
+function manualLevel(v) {
+  if(v==='auto'){ ST.manualOverride=false; recalc(); addLog('🤖','Switched to AI auto-adapt','user'); }
+  else { ST.manualOverride=true; setLevel(v,false); addLog('⚙','Manual override: '+v,'user'); }
+}
+
+/* ── SIMULATE ── */
+function sim(type, n) {
+  if (type==='streak') {
+    for(let i=0;i<n;i++){ ST.streak++; ST.done+=3; ST.calories+=350; if(ST.streak<=7) ST.week[ST.streak-1]='active'; }
+  } else if (type==='skip') {
+    ST.skipped+=n; for(let i=0;i<n&&i<7;i++) ST.week[i]='missed';
+  } else if (type==='complete') {
+    ST.done+=n; ST.calories+=n*120;
+  }
+  ST.score = Math.max(0,Math.min(100,Math.round(ST.done*8+ST.streak*12+(ST.calories/50)-ST.skipped*10)));
+  refresh(); recalc(); renderDots();
+  addLog('🎮','Simulated: '+type+' ×'+n,'user');
+}
+
+/* ── RESET ── */
+function resetAll() {
+  Object.assign(ST,{level:'beginner',score:0,done:0,skipped:0,streak:0,calories:0,adaptCount:0,autoAdapt:true,injuryMode:false,manualOverride:false,logs:[],week:Array(7).fill('empty'),milestones:[],todayDone:[],prs:0});
+  document.getElementById('auto-tog').checked   = true;
+  document.getElementById('injury-tog').checked = false;
+  document.getElementById('override-sel').value = 'auto';
+  setLevel('beginner',false);
+  renderDots(); renderMilestones(); refresh(); updateLevelUI(); updateInsight();
+  addLog('↺','Full reset — starting fresh','user');
+}
+
+/* ── INIT ── */
+renderToday(); renderLib(); renderDots(); renderMilestones(); refresh(); updateLevelUI(); updateInsight();
+</script>
+</body>
+</html>
